@@ -21,8 +21,8 @@ int main(int argc, char **argv) {
 
     /* Check command-line args */
     if (argc != 2) {
-        fprintf(stderr, "usage: %s <port> \n", argv[0]);
-        exit(0);
+        fprintf(stderr, "usage: %s <port>\n", argv[0]);
+        exit(1);
     }
     
     listenfd = open_listenfd(argv[1]);
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
         getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
 
-        printf("Accepted connection from (%s, %s) \n", hostname, port);
+        printf("Accepted connection from (%s, %s)\n", hostname, port);
 
         doit(connfd);
         close(connfd);
@@ -51,7 +51,7 @@ void doit(int fd) {
     rio_readinitb(&rio, fd);
     rio_readlineb(&rio, buf, MAXLINE);
 
-    printf("Request headers: \n");
+    printf("Request headers:\n");
     printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
 
@@ -94,16 +94,19 @@ void client_error(int fd, char *cause, char *errnum, char *shortmsg, char *longm
     /* Build the HTTP response body */
     sprintf(body, "<html><title>TINY Error</title>");
     sprintf(body, "%s<body bgcolor=""ffffff""\r\n", body);
-    sprintf(body, "%s%s: s\r\n", body, longmsg, cause);
+    sprintf(body, "%s%s: %s\r\n", body, errnum, shortmsg);
     sprintf(body, "%s<p>%s: %s\r\n", body, longmsg, cause);
     sprintf(body, "%s<hr><em>The TINY Web Server</em>\r\n", body);
 
     /* Print the HTTP response */
     sprintf(buf, "HTTP/1.0 %s %s\r\n", errnum, shortmsg);
+
     rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-type: text/html\r\n");
+
     rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-length: %d\r\n\r\n", (int)strlen(body));
+    
     rio_writen(fd, buf, strlen(buf));
     rio_writen(fd, body, strlen(body));
 }
@@ -165,7 +168,7 @@ void get_filetype(char *filename, char *filetype) {
     else if (strstr(filename, ".png"))
         strcpy(filetype, "image/png");
     
-    else if (strstr(filename, "jpg"))
+    else if (strstr(filename, ".jpg"))
         strcpy(filetype, "image/jpeg");
     
     else
@@ -179,7 +182,7 @@ void serve_static(int fd, char *filename, int filesize) {
     /* Send response headers to client */
     get_filetype(filename, filetype);
 
-    sprintf(buf, "HTTP/1.0 200 OK\n");
+    sprintf(buf, "HTTP/1.0 200 OK\r\n");
     sprintf(buf, "%sServer: TINY Web Server\r\n", buf);
     sprintf(buf, "%sConnection: close\r\n", buf);
     sprintf(buf, "%sContent-length: %d\r\n", buf, filesize);
@@ -187,7 +190,7 @@ void serve_static(int fd, char *filename, int filesize) {
 
     rio_writen(fd, buf, strlen(buf));
 
-    printf("Response headers: \n");
+    printf("Response headers:\n");
     printf("%s", buf);
 
     /* Send response body to client */
