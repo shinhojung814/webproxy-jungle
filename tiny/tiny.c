@@ -93,7 +93,7 @@ void client_error(int fd, char *cause, char *errnum, char *shortmsg, char *longm
 
     /* Build the HTTP response body */
     sprintf(body, "<html><title>TINY Error</title>");
-    sprintf(body, "%s<body bgcolor=""ffffff""\r\n", body);
+    sprintf(body, "%s<body bgcolor=""ffffff"">\r\n", body);
     sprintf(body, "%s%s: %s\r\n", body, errnum, shortmsg);
     sprintf(body, "%s<p>%s: %s\r\n", body, longmsg, cause);
     sprintf(body, "%s<hr><em>The TINY Web Server</em>\r\n", body);
@@ -106,7 +106,7 @@ void client_error(int fd, char *cause, char *errnum, char *shortmsg, char *longm
 
     rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-length: %d\r\n\r\n", (int)strlen(body));
-    
+
     rio_writen(fd, buf, strlen(buf));
     rio_writen(fd, body, strlen(body));
 }
@@ -149,6 +149,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs) {
 
         else
             strcpy(cgiargs, "");
+        
         strcpy(filename, ".");
         strcat(filename, uri);
 
