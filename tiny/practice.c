@@ -4,9 +4,9 @@ that uses the GET method to serve static and dynamic content */
 #include "csapp.h"
 
 void doit(int fd);
-
 void client_error(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
 void read_requesthdrs(rio_t *rp);
+
 int parse_uri(char *uri, char *filename, char *cgiargs);
 
 void get_filetype(char *filename, char *filetype);
@@ -48,7 +48,9 @@ void doit(int fd) {
     rio_t rio;
 
     /* Read request line and headers */
+    /* 식별자 fd를 주소 rio가 위치한 rio_t 타입의 읽기 버퍼와 연결 */
     rio_readinitb(&rio, fd);
+    /* 다음 텍스트 줄을 파일 rio에서 읽고, 메모리 위치 buf로 복사하고 텍스트 라인을 NULL로 종료 */
     rio_readlineb(&rio, buf, MAXLINE);
 
     printf("Request headers:\n");
@@ -100,13 +102,10 @@ void client_error(int fd, char *cause, char *errnum, char *shortmsg, char *longm
 
     /* Print the HTTP response */
     sprintf(buf, "HTTP/1.0 %s %s\r\n", errnum, shortmsg);
-
     rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-type: text/html\r\n");
-
     rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-length: %d\r\n\r\n", (int)strlen(body));
-
     rio_writen(fd, buf, strlen(buf));
     rio_writen(fd, body, strlen(body));
 }
@@ -149,7 +148,6 @@ int parse_uri(char *uri, char *filename, char *cgiargs) {
 
         else
             strcpy(cgiargs, "");
-        
         strcpy(filename, ".");
         strcat(filename, uri);
 
@@ -169,11 +167,8 @@ void get_filetype(char *filename, char *filetype) {
     else if (strstr(filename, ".png"))
         strcpy(filetype, "image/png");
     
-    else if (strstr(filename, ".jpg"))
+    else if (strstr(filename, "jpg"))
         strcpy(filetype, "image/jpeg");
-    
-    else if (strstr(filename, ".mp4"))
-        strcpy(filetype, "video/mp4");
     
     else
         strcpy(filetype, "text/plain");
@@ -186,15 +181,15 @@ void serve_static(int fd, char *filename, int filesize) {
     /* Send response headers to client */
     get_filetype(filename, filetype);
 
-    sprintf(buf, "HTTP/1.0 200 OK\r\n");
+    sprintf(buf, "HTTP/1.0 200 OK\n");
     sprintf(buf, "%sServer: TINY Web Server\r\n", buf);
-    sprintf(buf, "%sConnection: Close\r\n", buf);
+    sprintf(buf, "%sConnection: close\r\n", buf);
     sprintf(buf, "%sContent-length: %d\r\n", buf, filesize);
     sprintf(buf, "%sContent-type: %s\r\n\r\n", buf, filetype);
 
     rio_writen(fd, buf, strlen(buf));
 
-    printf("Response headers:\n");
+    printf("Response headers: \n");
     printf("%s", buf);
 
     /* Send response body to client */
@@ -213,7 +208,6 @@ void serve_dynamic(int fd, char *filename, char *cgiargs) {
     /* Return first part of HTTP response */
     sprintf(buf, "HTTP/1.0 200 OK\r\n");
     rio_writen(fd, buf, strlen(buf));
-
     sprintf(buf, "Server: TINY Web Server\r\n");
     rio_writen(fd, buf, strlen(buf));
 
