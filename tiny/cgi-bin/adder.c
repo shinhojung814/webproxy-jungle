@@ -1,24 +1,19 @@
 /* adder.c - a minimal CGI program that adds two numbers together */
 
-/* $begin adder */
-
 #include "csapp.h"
 
 int main(void) {
-    int num1 = 0, num2 = 0;
     char *buf, *p;
     char arg1[MAXLINE], arg2[MAXLINE], content[MAXLINE];
+    int num1 = 0, num2 = 0;
 
     /* Extract the two arguments */
     if ((buf = getenv("QUERY_STRING")) != NULL) {
         p = strchr(buf, '&');
         *p = '\0';
 
-        strcpy(arg1, buf);
-        strcpy(arg2, p + 1);
-
-        num1 = atoi(arg1);
-        num2 = atoi(arg2);
+        sscanf(buf, "num1 = %d", &num1);
+        sscanf(p + 1, "num2 = %d", &num2);
     }
 
     /* Make the response body */
@@ -34,9 +29,8 @@ int main(void) {
     printf("Content-length: %d\r\n", (int)strlen(content));
     printf("Content-type: text/html\r\n\r\n");
     printf("%s", content);
+
     fflush(stdout);
 
     exit(0);
 }
-
-/* $end adder */
