@@ -2,6 +2,7 @@
 
 <head>
     <title>TINY Web Server</title>
+    Dave O'Hallaron
 </head>
 
 <body>
@@ -12,10 +13,11 @@
         </video>
     </div>
     <div>
-        <textarea id="num1" rows="1">First Number</textarea>
-        <textarea id="num2" rows="1">Second Number</textarea>
-        <input type="submit" value="Submit"></input>
-        Dave O'Hallaron
+        <form action="/cgi-bin/form-adder" method="GET">
+            <textarea id="num1" rows="1">First Number</textarea>
+            <textarea id="num2" rows="1">Second Number</textarea>
+            <input type="submit" value="Submit"></input>
+        </form>
     </div>
 </body>
 
