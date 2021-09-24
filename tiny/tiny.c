@@ -4,9 +4,9 @@ that uses the GET method to serve static and dynamic content */
 #include "csapp.h"
 
 void doit(int fd);
+
 void client_error(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
 void read_requesthdrs(rio_t *rp);
-
 int parse_uri(char *uri, char *filename, char *cgiargs);
 
 void get_filetype(char *filename, char *filetype);
@@ -185,7 +185,7 @@ void serve_static(int fd, char *filename, int filesize) {
 
     sprintf(buf, "HTTP/1.0 200 OK\r\n");
     sprintf(buf, "%sServer: TINY Web Server\r\n", buf);
-    sprintf(buf, "%sConnection: close\r\n", buf);
+    sprintf(buf, "%sConnection: Close\r\n", buf);
     sprintf(buf, "%sContent-length: %d\r\n", buf, filesize);
     sprintf(buf, "%sContent-type: %s\r\n\r\n", buf, filetype);
 
@@ -210,6 +210,7 @@ void serve_dynamic(int fd, char *filename, char *cgiargs) {
     /* Return first part of HTTP response */
     sprintf(buf, "HTTP/1.0 200 OK\r\n");
     rio_writen(fd, buf, strlen(buf));
+
     sprintf(buf, "Server: TINY Web Server\r\n");
     rio_writen(fd, buf, strlen(buf));
 
