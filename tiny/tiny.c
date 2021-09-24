@@ -10,8 +10,8 @@ void read_requesthdrs(rio_t *rp);
 int parse_uri(char *uri, char *filename, char *cgiargs);
 
 void get_filetype(char *filename, char *filetype);
-void serve_static(int fd, char *filename, int filesize);
-void serve_dynamic(int fd, char *filename, char *cgiargs);
+void serve_static(int fd, char *filename, int filesize, char *method);
+void serve_dynamic(int fd, char *filename, char *cgiargs, char *method);
 
 int main(int argc, char **argv) {
     struct sockaddr_storage clientaddr;
@@ -55,7 +55,7 @@ void doit(int fd) {
     printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
 
-    if (strcasecmp(method, "GET")) {
+    if (!(strcasecmp(method, "GET") == 0 || strcasecmp(method, "HEAD") == 0)) {
         client_error(fd, method, "501", "Not implemented", "TINY does not implement this method");
         return;
     }
@@ -75,7 +75,7 @@ void doit(int fd) {
             client_error(fd, filename, "403", "Forbidden", "TINY couldn't read the file");
             return;
         }
-        serve_static(fd, filename, sbuf.st_size);
+        serve_static(fd, filename, sbuf.st_size, method);
     }
 
     /* Serve dynamic content */
@@ -84,7 +84,7 @@ void doit(int fd) {
             client_error(fd, filename, "403", "Forbidden", "TINY couldn't run the CGI program");
             return;
         }
-        serve_dynamic(fd, filename, cgiargs);
+        serve_dynamic(fd, filename, cgiargs, method);
     }
 }
 
@@ -179,7 +179,7 @@ void get_filetype(char *filename, char *filetype) {
         strcpy(filetype, "text/plain");
 }
 
-void serve_static(int fd, char *filename, int filesize) {
+void serve_static(int fd, char *filename, int filesize, char *method) {
     int srcfd;
     char *srcp, filetype[MAXLINE], buf[MAXBUF];
 
@@ -197,6 +197,9 @@ void serve_static(int fd, char *filename, int filesize) {
     printf("Response headers:\n");
     printf("%s", buf);
 
+    if (strcasecmp(method, "HEAD") == 0)
+        return;
+
     /* Send response body to client */
     srcfd = open(filename, O_RDONLY, 0);
     // srcp = mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
@@ -210,7 +213,7 @@ void serve_static(int fd, char *filename, int filesize) {
     free(srcp);
 }
 
-void serve_dynamic(int fd, char *filename, char *cgiargs) {
+void serve_dynamic(int fd, char *filename, char *cgiargs, char *method) {
     char buf[MAXLINE], *emptylist[] = {NULL};
 
     /* Return first part of HTTP response */
@@ -224,6 +227,7 @@ void serve_dynamic(int fd, char *filename, char *cgiargs) {
     if (fork() == 0) {
         /* Real server would set all CGI vars here */
         setenv("QUERY_STRING", cgiargs, 1);
+        setenv("REQUEST_METHOD", method, 1);
         /* Redirect stdout to client */
         dup2(fd, STDOUT_FILENO);
         /* Run CGI program */
