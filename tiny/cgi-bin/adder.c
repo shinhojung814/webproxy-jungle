@@ -22,7 +22,7 @@ int main(void) {
     sprintf(content, "%sThe Internet addition portal.\r\n<p>", content);
     sprintf(content, "%sThe answer is: %d + %d = %d\r\n<p>",
             content, num1, num2, num1 + num2);
-    sprintf(content, "%sThanks for visiting!\r\n", content);
+    sprintf(content, "%sThank you for visiting!\r\n", content);
 
     /* Generate the HTTP response */
     printf("Connection: Close\r\n");
