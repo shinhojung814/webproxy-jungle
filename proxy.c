@@ -19,6 +19,7 @@ static const char *connection_key = "Connection";
 static const char *proxy_connection_key = "Proxy-Connection";
 static const char *user_agent_key = "User-Agent";
 
+void *thread(void *vargp);
 void doit(int connfd);
 void parse_uri(int *port, char *uri, char *hostname, char *path);
 void build_http_header(int port, char *http_header, char *hostname, char *path, rio_t *client_rio);
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
     char hostname[MAXLINE], port[MAXLINE];
     struct sockaddr_storage clientaddr;
     socklen_t clientlen;
+    pthread_t tid;
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <port>\n", argv[0]);
@@ -45,12 +47,18 @@ int main(int argc, char **argv) {
         getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s %s).\n", hostname, port);
 
-        /* Handle client transaction sequentially */
-        doit(connfd);
-
-        close(connfd);
+        pthread_create(&tid, NULL, thread, (void *)connfd);
     }
     return 0;
+}
+
+void *thread(void *vargp) {
+    int connfd = (int)vargp;
+
+    pthread_detach(pthread_self());
+
+    doit(connfd);
+    close(connfd);
 }
 
 /* Handle client HTTP transaction */
@@ -60,10 +68,10 @@ void doit(int connfd) {
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
     char hostname[MAXLINE], path[MAXLINE];
     char server_http_header[MAXLINE];
-    rio_t rio, server_rio;
+    rio_t client_rio, server_rio;
 
-    rio_readinitb(&rio, connfd);
-    rio_readlineb(&rio, buf, MAXLINE);
+    rio_readinitb(&client_rio, connfd);
+    rio_readlineb(&client_rio, buf, MAXLINE);
     /* Read client request line */
     sscanf(buf, "%s %s %s", method, uri, version);
 
@@ -76,7 +84,7 @@ void doit(int connfd) {
     parse_uri(&port, uri, hostname, path);
 
     /* Build HTTP header which sends to the end server */
-    build_http_header(port, server_http_header, hostname, path, &rio);
+    build_http_header(port, server_http_header, hostname, path, &client_rio);
 
     /* Connect to end server */
     serverfd = connect_server(port, hostname, server_http_header);
