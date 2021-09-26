@@ -148,7 +148,7 @@ inline int connect_endServer(char *hostname,int port,char *http_header){
 /*parse the uri to get hostname,file path ,port*/
 void parse_uri(char *uri,char *hostname,char *path,int *port)
 {
-    *port = 80;
+    *port = 5000;
     char* pos = strstr(uri,"//");
 
     pos = pos!=NULL? pos+2:uri;
