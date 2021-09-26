@@ -103,7 +103,8 @@ void doit(int connfd) {
 
 /* Parse URI to get hostname, file path, port */
 void parse_uri(int *port, char *uri, char *hostname, char *path) {
-    int *port = 80;
+    *port = 80;
+    
     char *pos1 = strstr(uri, "//");
 
     pos1 = pos1 != NULL ? pos1 + 2 : uri;
