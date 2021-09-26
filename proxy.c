@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
         getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s %s).\n", hostname, port);
 
-        /* Sequential Handle client transaction */
+        /* Handle client transaction sequentially */
         doit(connfd);
 
         close(connfd);
@@ -112,19 +112,19 @@ void parse_uri(int *port, char *uri, char *hostname, char *path) {
     char *pos2 = strstr(pos1, ":");
 
     if (pos2 != NULL) {
-        *pos2 = "\0";
+        *pos2 = '\0';
         sscanf(pos1, "%s", hostname);
-        sscanf(pos2 + 1, "%d %s", port, path);
+        sscanf(pos2 + 1, "%d%s", port, path);
     }
 
     else {
         pos2 = strstr(pos1, "/");
 
         if (pos2 != NULL) {
-            *pos2 = "\0";
+            *pos2 = '\0';
             sscanf(pos1, "%s", hostname);
 
-            *pos2 = "/";
+            *pos2 = '/';
             sscanf(pos2, "%s", path);
         }
 
@@ -161,7 +161,7 @@ void build_http_header(int port, char *http_header, char *hostname, char *path, 
         sprintf(host_hdr, host_hdr_format, hostname);
     }
 
-    sprintf(http_header, "%s %s %s %s %s %s %s", request_hdr, host_hdr,
+    sprintf(http_header, "%s%s%s%s%s%s%s", request_hdr, host_hdr,
             conn_hdr, proxy_hdr, user_agent_hdr, other_hdr, endof_hdr);
     
     return;
