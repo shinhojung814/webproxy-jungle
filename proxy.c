@@ -161,7 +161,7 @@ void build_http_header(int port, char *http_header, char *hostname, char *path, 
         sprintf(host_hdr, host_hdr_format, hostname);
     }
 
-    sprintf(http_header, "%s %s %s %s %s %s %s", request_hdr, host_hdr,
+    sprintf(http_header, "%s%s%s%s%s%s%s", request_hdr, host_hdr,
             conn_hdr, proxy_hdr, user_agent_hdr, other_hdr, endof_hdr);
     
     return;
