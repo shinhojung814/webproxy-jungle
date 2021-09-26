@@ -62,7 +62,7 @@ void doit(int connfd) {
     char server_http_header[MAXLINE];
     rio_t rio, server_rio;
 
-    rio_readinit(&rio, connfd);
+    rio_readinitb(&rio, connfd);
     rio_readlineb(&rio, buf, MAXLINE);
     /* Read client request line */
     sscanf(buf, "%s %s %s", method, uri, version);
@@ -104,7 +104,7 @@ void doit(int connfd) {
 /* Parse URI to get hostname, file path, port */
 void parse_uri(int *port, char *uri, char *hostname, char *path) {
     *port = 80;
-    
+
     char *pos1 = strstr(uri, "//");
 
     pos1 = pos1 != NULL ? pos1 + 2 : uri;
