@@ -12,8 +12,8 @@ int main(void) {
         p = strchr(buf, '&');
         *p = '\0';
 
-        sscanf(buf, "num1 = %d", &num1);
-        sscanf(p + 1, "num2 = %d", &num2);
+        sscanf(buf, "num1=%d", &num1);
+        sscanf(p + 1, "num2=%d", &num2);
     }
 
     /* Make the response body */
