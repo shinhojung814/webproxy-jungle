@@ -151,7 +151,7 @@ void build_http_header(int port, char *http_header, char *hostname, char *path, 
             continue;
         }
 
-        if (!strcnasecmp(buf, connection_key, strlen(connection_key)) &&
+        if (!strncasecmp(buf, connection_key, strlen(connection_key)) &&
             !strncasecmp(buf, proxy_connection_key, strlen(proxy_connection_key)) &&
             !strncasecmp(buf, user_agent_key, strlen(user_agent_key))) {
                 strcat(other_hdr, buf);
