@@ -112,7 +112,7 @@ void parse_uri(int *port, char *uri, char *hostname, char *path) {
     char *pos2 = strstr(pos1, ":");
 
     if (pos2 != NULL) {
-        *pos2 = '\0';
+        *pos2 = "\0";
         sscanf(pos1, "%s", hostname);
         sscanf(pos2 + 1, "%d %s", port, path);
     }
@@ -121,10 +121,10 @@ void parse_uri(int *port, char *uri, char *hostname, char *path) {
         pos2 = strstr(pos1, "/");
 
         if (pos2 != NULL) {
-            *pos2 = '\0';
+            *pos2 = "\0";
             sscanf(pos1, "%s", hostname);
 
-            *pos2 = '/';
+            *pos2 = "/";
             sscanf(pos2, "%s", path);
         }
 
@@ -153,9 +153,8 @@ void build_http_header(int port, char *http_header, char *hostname, char *path, 
 
         if (!strncasecmp(buf, connection_key, strlen(connection_key)) &&
             !strncasecmp(buf, proxy_connection_key, strlen(proxy_connection_key)) &&
-            !strncasecmp(buf, user_agent_key, strlen(user_agent_key))) {
-                strcat(other_hdr, buf);
-        }
+            !strncasecmp(buf, user_agent_key, strlen(user_agent_key)))
+            strcat(other_hdr, buf);
     }
 
     if (strlen(host_hdr) == 0) {
@@ -172,6 +171,6 @@ void build_http_header(int port, char *http_header, char *hostname, char *path, 
 inline int connect_server(int port, char *hostname, char *http_header) {
     char portstr[100];
 
-    sprintf(portstr, '%d', port);
+    sprintf(portstr, "%d", port);
     return open_clientfd(hostname, portstr);
 }
