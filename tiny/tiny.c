@@ -203,7 +203,7 @@ void serve_static(int fd, char *filename, int filesize, char *method) {
     /* Send response body to client */
     srcfd = open(filename, O_RDONLY, 0);
     // srcp = mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
-    srcp = (char*)malloc(filesize);
+    srcp = (char *)malloc(filesize);
     rio_readn(srcfd, srcp, filesize);
     
     close(srcfd);
